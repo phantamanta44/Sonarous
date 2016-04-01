@@ -1,11 +1,15 @@
 package io.github.phantamanta44.sonarous;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.github.phantamanta44.sonarous.core.EventDispatcher;
 import io.github.phantamanta44.sonarous.core.RevokeHandler;
 import io.github.phantamanta44.sonarous.core.command.*;
 import io.github.phantamanta44.sonarous.player.Sonarous;
 import io.github.phantamanta44.sonarous.util.IniConfig;
 import io.github.phantamanta44.sonarous.util.LogWrapper;
+import org.slf4j.LoggerFactory;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.BufferedReader;
@@ -26,6 +30,7 @@ public class BotMain {
 
 	public static void main(String[] args) {
 		try {
+			((Logger)LoggerFactory.getLogger(Discord4J.class)).setLevel(Level.INFO);
 			config.read();
 			setPrefix(config.get("prefix"));
 			getAdmins();

@@ -30,10 +30,12 @@ public class Sonarous implements ICTListener {
 		CommandDispatcher.registerCommand(new CommandReplay());
 		CommandDispatcher.registerCommand(new CommandSkip());
 		CommandDispatcher.registerCommand(new CommandSubscribe());
+		CommandDispatcher.registerCommand(new CommandTest());
 		CommandDispatcher.registerCommand(new CommandUnpause());
 		CommandDispatcher.registerCommand(new CommandUnqueue());
 		CommandDispatcher.registerCommand(new CommandUnsubscribe());
 		EventDispatcher.registerHandler(new SongEndListener());
+		EventDispatcher.registerHandler(new KeepAliveListener());
 		SubscriptionHandler.load();
 	}
 
@@ -72,6 +74,8 @@ public class Sonarous implements ICTListener {
 	public static void enqueue(Song song) {
 		if (channel == null)
 			throw new IllegalStateException("Channel is not set!");
+		if (song == null)
+			throw new NullPointerException("Song cannot be null!");
 		queue.add(song);
 	}
 

@@ -55,9 +55,9 @@ public class CommandQueue implements ICommand {
 			ctx.sendMessage("This media source isn't supported at the moment!");
 		} catch (IllegalArgumentException e) {
 			ctx.sendMessage("Not a valid media link!");
-		} catch (RuntimeException e) {
+		} catch (Exception e) {
 			ctx.sendMessage("General exception retrieving media!");
-			e.getCause().printStackTrace();
+			e.printStackTrace();
 		}
 	}
 

@@ -1,14 +1,14 @@
 package io.github.phantamanta44.sonarous.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LogWrapper {
 
-	private final Log logger;
+	private final Logger logger;
 	
 	public LogWrapper(String name) {
-		logger = LogFactory.getLog(name);
+		logger = LoggerFactory.getLogger(name);
 	}
 	
 	public void info(String msg) {

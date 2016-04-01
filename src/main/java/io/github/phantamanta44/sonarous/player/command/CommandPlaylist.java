@@ -38,7 +38,7 @@ public class CommandPlaylist implements ICommand {
 		try {
 			AtomicInteger ind = new AtomicInteger(1);
 			String playlist = Sonarous.streamQueue().map(s -> String.format("%s | %s", ind.getAndIncrement(), s)).reduce((a, b) -> a.concat("\n").concat(b)).orElse("Nothing else is queued.");
-			ctx.sendMessage("__**Playlist:**__\nNow Playing: **%s**\nPlaylist: %s", Sonarous.getCurrentSong(), playlist);
+			ctx.sendMessage("__**Playlist:**__\nNow Playing: **%s**\n%s", Sonarous.getCurrentSong(), playlist);
 		} catch (IllegalStateException e) {
 			ctx.sendMessage("Not in any voice channels!");
 		}

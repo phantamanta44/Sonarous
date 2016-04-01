@@ -4,48 +4,44 @@ import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.core.command.ICommand;
 import io.github.phantamanta44.sonarous.core.context.IEventContext;
 import io.github.phantamanta44.sonarous.player.Sonarous;
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
+import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
-public class CommandSkip implements ICommand {
-
-	private static final List<String> ALIASES = Arrays.asList("next", "ff");
-
+public class CommandTest implements ICommand {
 	@Override
 	public String getName() {
-		return "skip";
+		return "test";
 	}
 
 	@Override
 	public List<String> getAliases() {
-		return ALIASES;
+		return Collections.emptyList();
 	}
 
 	@Override
 	public String getDesc() {
-		return "Skips the currently playing song.";
+		return "Play the test audio file.";
 	}
 
 	@Override
 	public String getUsage() {
-		return "skip";
+		return "test";
 	}
 
 	@Override
 	public void execute(IUser sender, String[] args, IEventContext ctx) {
-		try {
-			if (Sonarous.hasNext())
-				Sonarous.next();
-			else {
-				Sonarous.stop();
-				Sonarous.drop(0);
-			}
-			ctx.sendMessage("Skipped song.");
-		} catch (IllegalStateException e) {
-			ctx.sendMessage("Not in any voice channels!");
+		AudioChannel ac = Sonarous.getAudioChannel();
+		if (ac == null) {
+			ctx.sendMessage("No audio channel!");
+			return;
 		}
+		ac.clearQueue();
+		ac.queueFile(new File("test.mp3"));
+		ctx.sendMessage("Playing test audio...");
 	}
 
 	@Override
@@ -62,5 +58,4 @@ public class CommandSkip implements ICommand {
 	public String getEnglishInvocation() {
 		return null;
 	}
-
 }
