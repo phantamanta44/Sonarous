@@ -16,23 +16,27 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 
 public class SonarousListener {
+    
+    private final Pattern tagPattern;
+    
+    public SonarousListener(IUser botUser) {
+        tagPattern = Pattern.compile("^(?:" + Pattern.quote(botUser.mention(false)) + "|" + Pattern.quote(botUser.mention(true)) + ")\\s?");
+    }
 
     @EventSubscriber
     public void onMessage(MessageReceivedEvent event) {
         if (event.getMessage().getContent() == null || event.getMessage().getAuthor() == null)
             return;
-        String prefix = BotMain.client().getConfigValue("prefix").getAsString();
-        IUser botUser = BotMain.client().api().getOurUser();
-        Pattern tagPattern = Pattern.compile("^(?:" + Pattern.quote(botUser.mention(false)) + "|" + Pattern.quote(botUser.mention(true)) + ")\\s?");
-        Matcher m = tagPattern.matcher(event.getMessage().getContent());
+        
         String cmd = null;
-        if (event.getMessage().getContent().startsWith(prefix)) {
+        String prefix = BotMain.client().getConfigValue("prefix").getAsString();
+        Matcher m;
+        if (event.getMessage().getContent().startsWith(prefix))
             cmd = event.getMessage().getContent().substring(prefix.length());
-        } else if (m.find()) {
+        else if ((m = tagPattern.matcher(event.getMessage().getContent())).find())
             cmd = event.getMessage().getContent().substring(m.group(0).length());
-        } else {
+        else
             return;
-        }
 
         try {
             BotMain.commander().execute(new CmdCtx(event), cmd);

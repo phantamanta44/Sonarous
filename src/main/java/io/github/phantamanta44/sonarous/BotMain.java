@@ -19,7 +19,7 @@ public class BotMain {
         client.init().done(readyEvent -> {
             commander = CommandEngineProvider.getEngine(C4A4D4J.DESCRIPTOR);
             commander.scan("io.github.phantamanta44.sonarous.command");
-            client.api().getDispatcher().registerListener(new SonarousListener());
+            client.api().getDispatcher().registerListener(new SonarousListener(client.api().getOurUser()));
         }).fail(e -> {
             e.printStackTrace();
             ExitCodes.exit(ExitCodes.LOGIN_FAIL);
