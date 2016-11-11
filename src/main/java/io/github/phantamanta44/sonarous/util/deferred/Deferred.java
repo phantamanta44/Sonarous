@@ -1,11 +1,10 @@
 package io.github.phantamanta44.sonarous.util.deferred;
 
-import io.github.phantamanta44.sonarous.util.Lambdas;
-import io.github.phantamanta44.sonarous.util.concurrent.NullaryEventStream;
-import io.github.phantamanta44.sonarous.util.concurrent.UnaryEventStream;
-
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import io.github.phantamanta44.sonarous.util.concurrent.NullaryEventStream;
+import io.github.phantamanta44.sonarous.util.concurrent.UnaryEventStream;
 
 public class Deferred<A> {
 

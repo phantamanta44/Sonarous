@@ -1,22 +1,22 @@
 package io.github.phantamanta44.sonarous;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import io.github.phantamanta44.sonarous.util.concurrent.ThreadPoolFactory;
-import io.github.phantamanta44.sonarous.util.deferred.Deferred;
-import io.github.phantamanta44.sonarous.util.deferred.IPromise;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import io.github.phantamanta44.sonarous.util.concurrent.ThreadPoolFactory;
+import io.github.phantamanta44.sonarous.util.deferred.Deferred;
+import io.github.phantamanta44.sonarous.util.deferred.IPromise;
+import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 
 public class Discord {
 

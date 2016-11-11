@@ -1,11 +1,10 @@
 package io.github.phantamanta44.sonarous.util.deferred;
 
 
-import io.github.phantamanta44.sonarous.BotMain;
-import io.github.phantamanta44.sonarous.Discord;
-
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
+
+import io.github.phantamanta44.sonarous.BotMain;
 
 public class Deferreds {
 
