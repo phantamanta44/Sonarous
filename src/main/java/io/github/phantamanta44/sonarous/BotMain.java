@@ -1,82 +1,37 @@
 package io.github.phantamanta44.sonarous;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import io.github.phantamanta44.sonarous.core.EventDispatcher;
-import io.github.phantamanta44.sonarous.core.RevokeHandler;
-import io.github.phantamanta44.sonarous.core.command.*;
-import io.github.phantamanta44.sonarous.player.Sonarous;
-import io.github.phantamanta44.sonarous.util.IniConfig;
-import io.github.phantamanta44.sonarous.util.LogWrapper;
-import org.slf4j.LoggerFactory;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IUser;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import io.github.phantamanta44.c4a4d4j.C4A4D4J;
+import io.github.phantamanta44.c4a4d4j.CmdCtx;
+import io.github.phantamanta44.commands4a.CommandEngineProvider;
+import io.github.phantamanta44.commands4a.command.CommandEngine;
+import io.github.phantamanta44.sonarous.player.SonarousListener;
+import io.github.phantamanta44.sonarous.util.ExitCodes;
 
 public class BotMain {
-	
-	public static final LogWrapper logger = new LogWrapper("Sonar");
-	public static final IniConfig config = new IniConfig("sonarous.conf");
-	
-	private static final File ADMINS_FILE = new File("admins.txt");
-	private static final Set<String> controllers = new HashSet<>();
-	private static String prefix;
+
+    private static Discord client;
+    private static CommandEngine<CmdCtx> commander;
 
 	public static void main(String[] args) {
-		try {
-			((Logger)LoggerFactory.getLogger(Discord4J.class)).setLevel(Level.INFO);
-			config.read();
-			setPrefix(config.get("prefix"));
-			getAdmins();
-			Discord.getInstance()
-					.buildClient(config.get("email"), config.get("pass"))
-					.onReady(BotMain::registerListeners)
-					.login();
-		} catch (Exception e) {
-			logger.severe("Something went wrong!");
-			e.printStackTrace();
-		}
+        client = new Discord();
+		if (!client.readConfig())
+            ExitCodes.exit(ExitCodes.LOGIN_FAIL);
+        client.init().done(readyEvent -> {
+            commander = CommandEngineProvider.getEngine(C4A4D4J.DESCRIPTOR);
+            commander.scan("io.github.phantamanta44.sonarous.command");
+            client.api().getDispatcher().registerListener(new SonarousListener());
+        }).fail(e -> {
+            e.printStackTrace();
+            ExitCodes.exit(ExitCodes.LOGIN_FAIL);
+        });
 	}
-	
-	private static void registerListeners() {
-		CommandDispatcher.registerCommand(new CommandEngInvoc());
-		CommandDispatcher.registerCommand(new CommandGameSet());
-		CommandDispatcher.registerCommand(new CommandHalt());
-		CommandDispatcher.registerCommand(new CommandHelp());
-		CommandDispatcher.registerCommand(new CommandInfo());
-		CommandDispatcher.registerCommand(new CommandPrefix());
-		CommandDispatcher.registerCommand(new CommandUnsay());
-		EventDispatcher.registerHandler(new RevokeHandler());
-		Sonarous.registerListeners();
-	}
-		
-	private static void getAdmins() {
-		try (BufferedReader strIn = new BufferedReader(new FileReader(ADMINS_FILE))) {
-			String line;
-			while ((line = strIn.readLine()) != null)
-				controllers.add(line);
-		} catch (IOException ex) {
-			logger.severe("Error retrieving admin list!");
-			ex.printStackTrace();
-		}
-	}
-	
-	public static boolean isAdmin(IUser user) {
-		return controllers.contains(user.getName());
-	}
-	
-	public static String getPrefix() {
-		return prefix;
-	}
-	
-	public static void setPrefix(String newPrefix) {
-		prefix = newPrefix;
-	}
+
+	public static Discord client() {
+        return client;
+    }
+
+    public static CommandEngine<CmdCtx> commander() {
+        return commander;
+    }
 	
 }

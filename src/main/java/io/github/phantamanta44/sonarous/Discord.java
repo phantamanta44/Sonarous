@@ -1,154 +1,81 @@
 package io.github.phantamanta44.sonarous;
 
-import io.github.phantamanta44.sonarous.core.EventDispatcher;
-import io.github.phantamanta44.sonarous.core.command.CommandDispatcher;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.phantamanta44.sonarous.util.concurrent.ThreadPoolFactory;
-import io.github.phantamanta44.sonarous.util.concurrent.ThreadPoolFactory.PoolType;
-import io.github.phantamanta44.sonarous.util.concurrent.ThreadPoolFactory.QueueType;
+import io.github.phantamanta44.sonarous.util.deferred.Deferred;
+import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent.Reason;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Discord {
-	
-	private static final Discord instance = new Discord();
-	private static ScheduledExecutorService taskPool;
-	
-	public static Discord getInstance() {
-		return instance;
-	}
-	
-	private IDiscordClient dcCli;
-	private Runnable readyCb;
-	
-	static {
-		taskPool = new ThreadPoolFactory()
-				.withPool(PoolType.SCHEDULED)
-				.withQueue(QueueType.CACHED)
-				.construct();
-	}
-	
-	public Discord buildClient(String email, String pass) throws DiscordException {
-		BotMain.logger.info("Building Discord API...");
-		ClientBuilder cb = new ClientBuilder();
-		dcCli = cb.withLogin(email, pass).build();
-		registerListener(this);
-		registerListener(new EventDispatcher());
-		EventDispatcher.registerHandler(new CommandDispatcher());
-		return this;
-	}
-	
-	public Discord onReady(Runnable callback) {
-		readyCb = callback;
-		return this;
-	}
-	
-	public void login() throws DiscordException {
-		BotMain.logger.info("Attempting login...");
-		dcCli.login();
-	}
-	
-	private void registerListener(Object listener) {		
-		dcCli.getDispatcher().registerListener(listener);
-	}
-	
-	@EventSubscriber
-	public void onReady(ReadyEvent event) {
-		readyCb.run();
-		BotMain.logger.info("Logged in as \"%s\". Token: %s", dcCli.getOurUser().getName(), dcCli.getToken());
-		setGameCaption(BotMain.config.get("game"));
-	}
-	
-	@EventSubscriber
-	public void onDisconnect(DiscordDisconnectedEvent event) {
-		if (event.getReason() != Reason.LOGGED_OUT) {
-			BotMain.logger.warn("Disconnected from Discord! Attempting to reconnect...");
-			attemptReconnect(0L);
-		}
-	}
-	
-	private void attemptReconnect(long delay) {
-		if (!dcCli.isReady())
-			taskPool.schedule(() -> {
-				try {
-					Discord.getInstance().dcCli.login();
-				} catch (Exception e) {
-					BotMain.logger.warn("Could not reconnect: %s", e.getMessage());
-					BotMain.logger.warn("Trying again in 15 seconds...");
-					Discord.getInstance().attemptReconnect(15000L);
-				}
-			}, delay, TimeUnit.MILLISECONDS);
-	}
-	
-	public IUser getBot() {
-		return dcCli.getOurUser();
-	}
-	
-	public Collection<IGuild> getGuilds() {
-		return dcCli.getGuilds();
-	}
-	
-	public IGuild getGuildById(String id) {
-		return dcCli.getGuildByID(id);
-	}
-	
-	public Collection<IUser> getUsers() {
-		return getGuilds().stream()
-				.map(IGuild::getUsers)
-				.flatMap(List::stream)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-	
-	public IUser getUserById(String id) {
-		return dcCli.getUserByID(id);
-	}
-	
-	public Collection<IChannel> getChannels() {
-		return getGuilds().stream()
-				.map(IGuild::getChannels)
-				.flatMap(List::stream)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-	
-	public IChannel getChannelById(String id) {
-		return dcCli.getChannelByID(id);
-	}
 
-	public IChannel getPrivateChat(IUser user) {
-		try {
-			return dcCli.getOrCreatePMChannel(user);
-		} catch (Exception e) {
-			BotMain.logger.severe("Error retrieving private channel!");
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private static final File CFG_FILE = new File("sonarous_cfg.json");
 
-	public void setGameCaption(String gameName) {
-		Optional<String> opt;
-		if (gameName == null || gameName.isEmpty())
-			opt = Optional.empty();
-		else
-			opt = Optional.of(gameName);
-		dcCli.updatePresence(getBot().getPresence() == Presences.IDLE, opt);
-	}
+    private final ScheduledExecutorService threadPool;
+    private final Map<String, JsonElement> config;
 
-	public IInvite getInviteByCode(String code) {
-		return dcCli.getInviteForCode(code);
-	}
+    private IDiscordClient api;
+
+    Discord() {
+        this.threadPool = new ThreadPoolFactory()
+                .withPool(ThreadPoolFactory.PoolType.SCHEDULED)
+                .withQueue(ThreadPoolFactory.QueueType.CACHED)
+                .construct();
+        this.config = new HashMap<>();
+    }
+
+    public IPromise<ReadyEvent> init() {
+        Deferred<ReadyEvent> def = new Deferred<>();
+        try {
+            api = new ClientBuilder().withToken(getConfigValue("token").getAsString()).build();
+            api.getDispatcher().registerTemporaryListener((ReadyEvent event) -> def.resolve(event));
+            api.login(false);
+        } catch (Throwable e) {
+            def.reject(e);
+        }
+        return def.promise();
+    }
+
+    public IDiscordClient api() {
+        return api;
+    }
+
+    public ScheduledExecutorService executorPool() {
+        return threadPool;
+    }
+
+    public JsonElement getConfigValue(String key) {
+        return config.get(key);
+    }
+
+    boolean readConfig() {
+        JsonParser parser = new JsonParser();
+        try (FileReader in = new FileReader(CFG_FILE)) {
+            parseConfigTree(parser.parse(in).getAsJsonObject(), "");
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void parseConfigTree(JsonObject tree, String prefix) {
+        tree.entrySet().forEach(e -> {
+            config.put(prefix + e.getKey(), e.getValue());
+            if (e.getValue().isJsonObject())
+                parseConfigTree(e.getValue().getAsJsonObject(), prefix + e.getKey() + ".");
+        });
+    }
 
 }

@@ -1,18 +1,8 @@
 package io.github.phantamanta44.sonarous.util.concurrent;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Function;
-
 
 public class ThreadPoolFactory {
 
@@ -48,7 +38,7 @@ public class ThreadPoolFactory {
 		
 		private final Function<Integer, ExecutorService> builder;
 		
-		QueueType(Function<Integer, ExecutorService> builder) {
+		private QueueType(Function<Integer, ExecutorService> builder) {
 			this.builder = builder;
 		}
 		
@@ -57,11 +47,11 @@ public class ThreadPoolFactory {
 	public static enum PoolType {
 		
 		EXECUTOR(e -> e),
-		SCHEDULED(DelegatedScheduler::new);
+		SCHEDULED(e -> new DelegatedScheduler(e));
 		
 		private final Function<ExecutorService, ? extends ExecutorService> builder;
 		
-		PoolType(Function<ExecutorService, ExecutorService> builder) {
+		private PoolType(Function<ExecutorService, ExecutorService> builder) {
 			this.builder = builder;
 		}
 		
@@ -71,7 +61,7 @@ public class ThreadPoolFactory {
 
 		private final ExecutorService del;
 		
-		private DelegatedScheduler(ExecutorService executor) {
+		public DelegatedScheduler(ExecutorService executor) {
 			super(1);
 			this.del = executor;
 		}
@@ -129,11 +119,11 @@ public class ThreadPoolFactory {
 			return remainingTasks;
 		}
 		
-		private static class ChildFuture<T> implements ScheduledFuture<T> {
+		public static class ChildFuture<T> implements ScheduledFuture<T> {
 			
 			private ScheduledFuture<Future<T>> del;
 			
-			private ChildFuture(ScheduledFuture<Future<T>> parent) {
+			public ChildFuture(ScheduledFuture<Future<T>> parent) {
 				this.del = parent;
 			}
 
