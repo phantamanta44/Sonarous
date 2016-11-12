@@ -1,11 +1,11 @@
-package io.github.phantamanta44.sonarous.player.impl;
+package io.github.phantamanta44.sonarous.player.song.impl;
 
 import com.github.fge.lambdas.Throwing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.phantamanta44.sonarous.BotMain;
-import io.github.phantamanta44.sonarous.player.ISong;
-import io.github.phantamanta44.sonarous.player.ISongProvider;
+import io.github.phantamanta44.sonarous.player.song.ISong;
+import io.github.phantamanta44.sonarous.player.song.ISongProvider;
 import io.github.phantamanta44.sonarous.util.SafeJsonWrapper;
 import io.github.phantamanta44.sonarous.util.deferred.Deferreds;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
@@ -19,7 +19,7 @@ import javax.sound.sampled.AudioSystem;
 import java.net.URI;
 import java.util.regex.Pattern;
 
-public class SoundcloudProvider implements ISongProvider {
+public class SoundcloudSongProvider implements ISongProvider {
 
     private static final Pattern URL_PAT = Pattern.compile("^https?://.*soundcloud\\.com/.+$", Pattern.CASE_INSENSITIVE);
     private static final String RESOLVE_URL = "https://api.soundcloud.com/resolve?url=%s&client_id=%s";

@@ -30,7 +30,7 @@
     <orderEntry type="library" name="Maven: jflac:jflac:1.3" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-3" level="project" />
     <orderEntry type="library" name="Maven: org.tritonus:tritonus-dsp:0.3.6" level="project" />
-    <orderEntry type="library" name="Maven: io.github.phantamanta44.c4a4d4j:c4a4d4j:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: com.github.phantamanta44:c4a4d4j:v1.0.2" level="project" />
     <orderEntry type="library" name="Maven: com.github.phantamanta44:commands4a:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.phantamanta44:NomReflect:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: io.github.lukehutch:fast-classpath-scanner:2.0.1" level="project" />

@@ -1,14 +1,13 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.player.song;
 
-import java.util.Collections;
+import com.github.fge.lambdas.Throwing;
+import io.github.phantamanta44.nomreflect.Reflect;
+import io.github.phantamanta44.sonarous.util.deferred.IPromise;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.github.fge.lambdas.Throwing;
-
-import io.github.phantamanta44.nomreflect.Reflect;
-import io.github.phantamanta44.sonarous.util.deferred.IPromise;
+import java.util.stream.Stream;
 
 public class SongResolver {
 
@@ -33,6 +32,10 @@ public class SongResolver {
         if (provider.isPresent())
             return provider.get().resolve(url);
         throw new UnsupportedOperationException();
+    }
+
+    public Stream<ISongProvider> providers() {
+        return providers.stream();
     }
     
 }

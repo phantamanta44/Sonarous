@@ -1,9 +1,6 @@
 package io.github.phantamanta44.sonarous.util;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.IntBinaryOperator;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 public class Lambdas {
 
@@ -49,4 +46,9 @@ public class Lambdas {
     public static <T> Predicate<T> nonNull() {
         return x -> x != null;
     }
+
+    public static <T> Function<T, T> identity() {
+        return x -> x;
+    }
+
 }

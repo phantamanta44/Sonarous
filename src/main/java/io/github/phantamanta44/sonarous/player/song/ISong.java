@@ -1,4 +1,4 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.player.song;
 
 public interface ISong {
 

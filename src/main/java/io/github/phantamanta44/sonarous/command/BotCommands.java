@@ -34,17 +34,29 @@ public class BotCommands {
         if (reason != null) {
             switch (reason.toLowerCase()) {
                 case "reboot":
-                    RBU.reply(ctx.getMessage(), "Rebooting!").always(ignored -> ExitCodes.exit(ExitCodes.REBOOT));
+                    RBU.reply(ctx.getMessage(), "Rebooting!").always(ignored -> {
+                        ServerData.writeData();
+                        ServerData.unbindAll();
+                        ExitCodes.exit(ExitCodes.REBOOT);
+                    });
                     break;
                 case "update":
-                    RBU.reply(ctx.getMessage(), "Updating!").always(ignored -> ExitCodes.exit(ExitCodes.UPDATE));
+                    RBU.reply(ctx.getMessage(), "Updating!").always(ignored -> {
+                        ServerData.writeData();
+                        ServerData.unbindAll();
+                        ExitCodes.exit(ExitCodes.UPDATE);
+                    });
                     break;
                 default:
                     RBU.reply(ctx.getMessage(), "Unknown exit reason!");
                     break;
             }
         } else {
-            RBU.reply(ctx.getMessage(), "Halting!").always(ignored -> ExitCodes.exit(ExitCodes.SUCCESS));
+            RBU.reply(ctx.getMessage(), "Halting!").always(ignored -> {
+                ServerData.writeData();
+                ServerData.unbindAll();
+                ExitCodes.exit(ExitCodes.SUCCESS);
+            });
         }
     }
 

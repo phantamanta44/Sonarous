@@ -1,5 +1,7 @@
 package io.github.phantamanta44.sonarous.player;
 
+import io.github.phantamanta44.sonarous.player.search.ISearchResult;
+import io.github.phantamanta44.sonarous.player.song.ISong;
 import io.github.phantamanta44.sonarous.util.RBU;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 import sx.blah.discord.handle.audio.IAudioManager;
@@ -15,6 +17,7 @@ import java.util.stream.Stream;
 public class MusicPlayer {
 
     public Set<String> skipVotes = new HashSet<>();
+    public List<ISearchResult> search = new CopyOnWriteArrayList<>();
 
     private IChannel notChan = null;
     private IVoiceChannel channel = null;
@@ -34,6 +37,7 @@ public class MusicPlayer {
     }
 
     public void unbind() {
+        clearQueue();
         if (channel != null) {
             channel.leave();
             channel = null;
@@ -76,14 +80,17 @@ public class MusicPlayer {
 
     public void clearQueue() {
         queue.clear();
-        provider.clear();
+        skipVotes.clear();
+        search.clear();
+        if (provider != null)
+            provider.clear();
     }
 
     public ISong getPlaying() {
         return playing;
     }
 
-    private String getPlayingMessage() {
+    public String getPlayingMessage() {
         StringBuilder msg = new StringBuilder("__**Now Playing: ");
         if (playing.getAuthor() != null)
             msg.append(playing.getAuthor()).append(" \u2013 ");
@@ -100,6 +107,10 @@ public class MusicPlayer {
 
     public Stream<ISong> queue() {
         return queue.stream();
+    }
+
+    public boolean isQueueEmpty() {
+        return queue.isEmpty();
     }
 
     public boolean isBound() {

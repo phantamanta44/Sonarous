@@ -1,4 +1,4 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.player.song;
 
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 
