@@ -1,4 +1,4 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.bot;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +49,7 @@ public class SonarousListener {
             if (mcmCfg != null && mcmCfg.getAsBoolean())
                 RBU.reply(event.getMessage(), "No such command `" + e.getCommand() + "`!");
         } catch (InvalidSyntaxException e) {
-            RBU.reply(event.getMessage(), "Invalid parameters! " + e.getReason());
+            RBU.reply(event.getMessage(), e.getReason());
         }
     }
 

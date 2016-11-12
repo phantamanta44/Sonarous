@@ -1,8 +1,8 @@
 package io.github.phantamanta44.sonarous.player;
 
-import java.nio.ByteBuffer;
-
 public interface ISong {
+
+    ISongProvider getProvider();
 
     String getName();
     
@@ -14,6 +14,12 @@ public interface ISong {
     
     String getArtUrl();
     
-    ByteBuffer getAudio();
+    byte[] getAudio();
+
+    int getFrameSize();
+
+    default long getLength() {
+        return getAudio().length / (getFrameSize() / 8);
+    }
     
 }

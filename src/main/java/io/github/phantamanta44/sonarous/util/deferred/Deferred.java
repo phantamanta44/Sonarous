@@ -86,6 +86,15 @@ public class Deferred<A> {
             }
 
             @Override
+            public <B> IPromise<B> then(Function<A, IPromise<B>> mapper) {
+                Deferred<B> def = new Deferred<>();
+                done(r -> mapper.apply(r).done(def::resolve).fail(def::reject).progress(def::notifyProgress));
+                fail(def::reject);
+                progress(def::notifyProgress);
+                return def.promise();
+            }
+
+            @Override
             public PromiseState state() {
                 return state;
             }

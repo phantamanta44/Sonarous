@@ -1,5 +1,6 @@
 package io.github.phantamanta44.sonarous.player;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,17 +12,23 @@ import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 
 public class SongResolver {
 
-    private final List<ISongProvider> providers;
+    private List<ISongProvider> providers;
     
-    public SongResolver() {
-        providers = Reflect.types("io.github.phantamanta44.sonarous.player.impl")
-                .extending(ISongProvider.class)
-                .find().stream()
-                .map(Throwing.function(type -> (ISongProvider)type.newInstance()))
-                .collect(Collectors.toList());
+    public SongResolver(String pkg) {
+        try {
+            providers = Reflect.types(pkg)
+                    .extending(ISongProvider.class)
+                    .find().stream()
+                    .filter(c -> !c.isInterface())
+                    .map(Throwing.function(type -> (ISongProvider)type.newInstance()))
+                    .filter(ISongProvider::initialize)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
-    public IPromise<ISong> resolve(String url) {
+    public IPromise<? extends ISong> resolve(String url) {
         Optional<ISongProvider> provider = providers.stream().filter(p -> p.canResolve(url)).findAny();
         if (provider.isPresent())
             return provider.get().resolve(url);

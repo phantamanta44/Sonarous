@@ -1,4 +1,4 @@
-package io.github.phantamanta44.sonarous;
+package io.github.phantamanta44.sonarous.bot;
 
 import java.io.File;
 import java.io.FileReader;
@@ -27,7 +27,7 @@ public class Discord {
 
     private IDiscordClient api;
 
-    Discord() {
+    public Discord() {
         this.threadPool = new ThreadPoolFactory()
                 .withPool(ThreadPoolFactory.PoolType.SCHEDULED)
                 .withQueue(ThreadPoolFactory.QueueType.CACHED)
@@ -59,7 +59,7 @@ public class Discord {
         return config.get(key);
     }
 
-    boolean readConfig() {
+    public boolean readConfig() {
         JsonParser parser = new JsonParser();
         try (FileReader in = new FileReader(CFG_FILE)) {
             parseConfigTree(parser.parse(in).getAsJsonObject(), "");

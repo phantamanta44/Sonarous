@@ -4,8 +4,12 @@ import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 
 public interface ISongProvider {
 
-    IPromise<ISong> resolve(String url);
+    boolean initialize();
+
+    IPromise<? extends ISong> resolve(String url);
     
     boolean canResolve(String url);
+
+    String getName();
     
 }

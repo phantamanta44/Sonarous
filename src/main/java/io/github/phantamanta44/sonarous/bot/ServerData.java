@@ -1,7 +1,8 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.bot;
 
 import com.google.gson.*;
 import io.github.phantamanta44.sonarous.BotMain;
+import io.github.phantamanta44.sonarous.player.MusicPlayer;
 
 import java.io.*;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class ServerData {
         try (FileReader in = new FileReader(DATA_FILE)) {
             parser.parse(in).getAsJsonObject().entrySet()
                     .forEach(e -> serverMap.put(e.getKey(), new ServerData(e.getValue().getAsJsonObject())));
+        } catch(FileNotFoundException ignored) {
+            // NO-OP
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,12 +46,15 @@ public class ServerData {
     }
 
     private String prefix;
+    private MusicPlayer player;
 
     public ServerData() {
+        this.player = new MusicPlayer();
         this.prefix = BotMain.client().getConfigValue("prefix").getAsString();
     }
 
     public ServerData(JsonObject dto) {
+        this.player = new MusicPlayer();
         this.prefix = dto.get("prefix").getAsString();
     }
 
@@ -64,6 +70,14 @@ public class ServerData {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public MusicPlayer getPlayer() {
+        return player;
+    }
+
+    public static void unbindAll() {
+        serverMap.values().stream().map(ServerData::getPlayer).forEach(MusicPlayer::unbind);
     }
 
 }

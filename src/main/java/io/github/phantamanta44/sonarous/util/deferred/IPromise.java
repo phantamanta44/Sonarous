@@ -15,6 +15,8 @@ public interface IPromise<A> {
 
     <B> IPromise<B> map(Function<A, B> mapper);
 
+    <B> IPromise<B> then(Function<A, IPromise<B>> mapper);
+
     PromiseState state();
 
 }

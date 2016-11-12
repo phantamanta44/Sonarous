@@ -1,12 +1,22 @@
 package io.github.phantamanta44.sonarous;
 
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.phantamanta44.c4a4d4j.C4A4D4J;
 import io.github.phantamanta44.c4a4d4j.CmdCtx;
 import io.github.phantamanta44.commands4a.CommandEngineProvider;
+import io.github.phantamanta44.commands4a.annot.Command;
 import io.github.phantamanta44.commands4a.command.CommandEngine;
-import io.github.phantamanta44.sonarous.player.ServerData;
-import io.github.phantamanta44.sonarous.player.SonarousListener;
+import io.github.phantamanta44.commands4a.command.CommandExecution;
+import io.github.phantamanta44.sonarous.bot.Discord;
+import io.github.phantamanta44.sonarous.bot.ServerData;
+import io.github.phantamanta44.sonarous.bot.SonarousListener;
+import io.github.phantamanta44.sonarous.command.PlayerCommands;
 import io.github.phantamanta44.sonarous.util.ExitCodes;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 public class BotMain {
 
@@ -25,7 +35,10 @@ public class BotMain {
             e.printStackTrace();
             ExitCodes.exit(ExitCodes.LOGIN_FAIL);
         });
-        Runtime.getRuntime().addShutdownHook(new Thread(ServerData::writeData));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            ServerData.writeData();
+            ServerData.unbindAll();
+        }));
 	}
 
 	public static Discord client() {
