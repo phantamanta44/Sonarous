@@ -64,7 +64,7 @@
         <dependency>
             <groupId>com.github.phantamanta44</groupId>
             <artifactId>c4a4d4j</artifactId>
-            <version>v1.0.0</version>
+            <version>v1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.fge</groupId>

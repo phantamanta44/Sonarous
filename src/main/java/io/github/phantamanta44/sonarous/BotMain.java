@@ -4,6 +4,7 @@ import io.github.phantamanta44.c4a4d4j.C4A4D4J;
 import io.github.phantamanta44.c4a4d4j.CmdCtx;
 import io.github.phantamanta44.commands4a.CommandEngineProvider;
 import io.github.phantamanta44.commands4a.command.CommandEngine;
+import io.github.phantamanta44.sonarous.player.ServerData;
 import io.github.phantamanta44.sonarous.player.SonarousListener;
 import io.github.phantamanta44.sonarous.util.ExitCodes;
 
@@ -24,6 +25,7 @@ public class BotMain {
             e.printStackTrace();
             ExitCodes.exit(ExitCodes.LOGIN_FAIL);
         });
+        Runtime.getRuntime().addShutdownHook(new Thread(ServerData::writeData));
 	}
 
 	public static Discord client() {

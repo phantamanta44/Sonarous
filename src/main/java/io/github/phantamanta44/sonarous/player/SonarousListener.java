@@ -29,7 +29,9 @@ public class SonarousListener {
             return;
         
         String cmd = null;
-        String prefix = BotMain.client().getConfigValue("prefix").getAsString();
+        String prefix = event.getMessage().getChannel().isPrivate()
+                ? BotMain.client().getConfigValue("prefix").getAsString()
+                : ServerData.forServer(event.getMessage().getGuild().getID()).getPrefix();
         Matcher m;
         if (event.getMessage().getContent().startsWith(prefix))
             cmd = event.getMessage().getContent().substring(prefix.length());
