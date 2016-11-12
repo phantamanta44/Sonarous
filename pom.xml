@@ -81,5 +81,10 @@
             <artifactId>mp3spi</artifactId>
             <version>1.9.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>net.bramp.ffmpeg</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>0.5</version>
+        </dependency>
 	</dependencies>
 </project>

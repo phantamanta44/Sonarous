@@ -42,5 +42,8 @@
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:mp3spi:1.9.5.4" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:jlayer:1.0.1.4" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.2" level="project" />
+    <orderEntry type="library" name="Maven: net.bramp.ffmpeg:ffmpeg:0.5" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:19.0" level="project" />
+    <orderEntry type="library" name="Maven: org.modelmapper:modelmapper:0.7.5" level="project" />
   </component>
 </module>

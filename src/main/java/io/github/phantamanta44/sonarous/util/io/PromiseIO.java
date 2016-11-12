@@ -13,8 +13,11 @@ import io.github.phantamanta44.sonarous.util.Maths;
 import io.github.phantamanta44.sonarous.util.deferred.Deferred;
 import io.github.phantamanta44.sonarous.util.deferred.Deferreds;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
+import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -50,5 +53,13 @@ public class PromiseIO {
     public static IPromise<List<String>> readFile(File file) {
         return Deferreds.call(Throwing.supplier(() -> Files.readAllLines(file.toPath()))).promise();
     }
-    
+
+    public static IPromise<byte[]> readBytes(File file) {
+        return Deferreds.call(Throwing.supplier(() -> {
+            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+                return IOUtils.toByteArray(in);
+            }
+        })).promise();
+    }
+
 }
