@@ -59,11 +59,13 @@ public class ServerData {
     public ServerData(JsonObject dto) {
         this.player = new MusicPlayer();
         this.prefix = dto.get("prefix").getAsString();
+        this.player.getVolControl().setAmplitude(dto.get("volume").getAsFloat());
     }
 
     private JsonObject serialize() {
         JsonObject dto = new JsonObject();
         dto.addProperty("prefix", prefix);
+        dto.addProperty("volume", player.getVolControl().getAmplitude());
         return dto;
 }
 

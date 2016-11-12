@@ -17,9 +17,5 @@ public interface ISong {
     byte[] getAudio();
 
     int getFrameSize();
-
-    default long getLength() {
-        return getAudio().length / (getFrameSize() / 8);
-    }
     
 }

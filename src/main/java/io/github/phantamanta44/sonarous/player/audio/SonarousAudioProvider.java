@@ -1,4 +1,4 @@
-package io.github.phantamanta44.sonarous.player;
+package io.github.phantamanta44.sonarous.player.audio;
 
 import io.github.phantamanta44.sonarous.util.concurrent.NullaryEventStream;
 import sx.blah.discord.handle.audio.IAudioProcessor;

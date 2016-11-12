@@ -1,5 +1,7 @@
 package io.github.phantamanta44.sonarous.player;
 
+import io.github.phantamanta44.sonarous.player.audio.AmplificationProcessor;
+import io.github.phantamanta44.sonarous.player.audio.SonarousAudioProvider;
 import io.github.phantamanta44.sonarous.player.search.ISearchResult;
 import io.github.phantamanta44.sonarous.player.song.ISong;
 import io.github.phantamanta44.sonarous.util.RBU;
@@ -19,10 +21,12 @@ public class MusicPlayer {
     public Set<String> skipVotes = new HashSet<>();
     public List<ISearchResult> search = new CopyOnWriteArrayList<>();
 
+    private SonarousAudioProvider provider;
+    private AmplificationProcessor volControl = new AmplificationProcessor(0.5F);
+    private IAudioManager audioManager;
+
     private IChannel notChan = null;
     private IVoiceChannel channel = null;
-    private SonarousAudioProvider provider;
-    private IAudioManager audioManager;
     private ISong playing = null;
     private List<ISong> queue = new CopyOnWriteArrayList<>();
 
@@ -94,19 +98,22 @@ public class MusicPlayer {
         StringBuilder msg = new StringBuilder("__**Now Playing: ");
         if (playing.getAuthor() != null)
             msg.append(playing.getAuthor()).append(" \u2013 ");
-        msg.append(playing.getName()).append("**__\n")
-                .append("*(via ").append(playing.getProvider().getName()).append(")*\n\n");
+        msg.append(playing.getName()).append("**__\n");
         if (playing.getAlbum() != null)
             msg.append("**From the Album: ").append(playing.getAlbum()).append("**\n");
         if (playing.getUrl() != null)
             msg.append("**URL: ").append(playing.getUrl()).append("**\n");
         if (playing.getArtUrl() != null)
             msg.append("**Artwork: ").append(playing.getArtUrl()).append("**\n");
-        return msg.toString().trim();
+        return msg.append("*(via ").append(playing.getProvider().getName()).append(")*").toString();
     }
 
     public Stream<ISong> queue() {
         return queue.stream();
+    }
+
+    public AmplificationProcessor getVolControl() {
+        return volControl;
     }
 
     public boolean isQueueEmpty() {
@@ -120,6 +127,7 @@ public class MusicPlayer {
     private IAudioManager am() {
         if (audioManager == null) {
             provider = new SonarousAudioProvider();
+            provider.addProcessor(volControl);
             audioManager = channel.getGuild().getAudioManager();
             audioManager.setAudioProvider(provider);
             audioManager.setAudioProcessor(provider.getProcessor());

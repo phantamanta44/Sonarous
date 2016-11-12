@@ -152,6 +152,21 @@ public class PlayerCommands {
         RBU.reply(ctx.getMessage(), "Resuming playback.");
     }
 
+    @Command(name = "volume", usage = "[decibels]")
+    @Desc("Sets the playback volume, in decibels.")
+    @Alias("vol")
+    @Prereq("perm:manage_messages") @Prereq("guild:true")
+    public static void volume(CmdCtx ctx, Integer volume) {
+        MusicPlayer player = ServerData.forServer(ctx.getGuild().getID()).getPlayer();
+        if (!player.isBound())
+            RBU.reply(ctx.getMessage(), "The bot isn't bound to a voice channel!");
+        else {
+            volume = Math.min(volume, 6);
+            player.getVolControl().setAmplitude(0.5F * (float)Math.pow(10F, volume / 20F));
+            RBU.reply(ctx.getMessage(), "Set volume to %d dB.", volume.intValue());
+        }
+    }
+
     @Command(name = "playing")
     @Desc("Gets the currently playing song.")
     @Alias("nowplaying")
