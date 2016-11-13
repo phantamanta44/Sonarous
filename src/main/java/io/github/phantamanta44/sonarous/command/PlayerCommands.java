@@ -68,10 +68,12 @@ public class PlayerCommands {
             return;
         }
         try {
+            player.incrementOperations();
             resolver.resolve(url).done(song -> {
                 RBU.reply(ctx.getMessage(), "Queued `%s`.", song.getName());
                 player.queue(song);
-            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve audio: %s", e.getMessage()));
+            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve audio: %s", e.getMessage()))
+            .always(ignored -> player.decrementOperations());
         } catch (UnsupportedOperationException e) {
             RBU.reply(ctx.getMessage(), "This audio source isn't supported!");
         }
@@ -229,6 +231,7 @@ public class PlayerCommands {
             return;
         }
         try {
+            player.incrementOperations();
             search.resolve(provider, Arrays.stream(args).skip(1).collect(Collectors.joining(" "))).done(r -> {
                 player.search.addAll(r);
                 if (r.isEmpty())
@@ -240,7 +243,8 @@ public class PlayerCommands {
                             .forEach(msg::append);
                     RBU.send(ctx.getChannel(), msg.append("**Use `result [song]` to select a song.**").toString());
                 }
-            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve search results: %s", e.getMessage()));
+            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve search results: %s", e.getMessage()))
+            .always(ignored -> player.decrementOperations());
         } catch (UnsupportedOperationException e) {
             RBU.reply(ctx.getMessage(), "This search provider isn't supported!");
         }
@@ -258,11 +262,13 @@ public class PlayerCommands {
         else if (!Maths.bounds(index, 1, player.search.size() + 1))
             RBU.reply(ctx.getMessage(), "Your selected result number is out of bounds!");
         else {
+            player.incrementOperations();
             player.search.get(index - 1).resolve().done(song -> {
                 RBU.reply(ctx.getMessage(), "Queued `%s`.", song.getName());
                 player.queue(song);
                 player.search.clear();
-            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve audio: %s", e.getMessage()));
+            }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve audio: %s", e.getMessage()))
+            .always(ignored -> player.decrementOperations());
         }
     }
 

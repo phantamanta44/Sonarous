@@ -20,9 +20,10 @@ public class MusicPlayer {
 
     public Set<String> skipVotes = new HashSet<>();
     public List<ISearchResult> search = new CopyOnWriteArrayList<>();
+    private int operations = 0;
 
     private SonarousAudioProvider provider;
-    private AmplificationProcessor volControl = new AmplificationProcessor(0.5F);
+    private AmplificationProcessor volControl = new AmplificationProcessor();
     private IAudioManager audioManager;
 
     private IChannel notChan = null;
@@ -32,6 +33,17 @@ public class MusicPlayer {
 
     public void setNotificationChan(IChannel notChan) {
         this.notChan = notChan;
+    }
+
+    public synchronized void incrementOperations() {
+        operations++;
+        notChan.setTypingStatus(true);
+    }
+
+    public synchronized void decrementOperations() {
+        operations--;
+        if (operations == 0 && notChan != null)
+            notChan.setTypingStatus(false);
     }
 
     public IPromise<Void> bind(IVoiceChannel channel) {
@@ -49,9 +61,11 @@ public class MusicPlayer {
     }
 
     public void queue(ISong song) {
-        queue.add(song);
-        if (playing == null)
-            nextSong();
+        if (isBound()) {
+            queue.add(song);
+            if (playing == null)
+                nextSong();
+        }
     }
 
     public void nextSong() {
@@ -86,6 +100,7 @@ public class MusicPlayer {
         queue.clear();
         skipVotes.clear();
         search.clear();
+        operations = 0;
         if (provider != null)
             provider.clear();
     }
