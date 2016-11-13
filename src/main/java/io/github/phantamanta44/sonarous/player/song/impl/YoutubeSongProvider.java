@@ -57,11 +57,11 @@ public class YoutubeSongProvider implements ISongProvider {
     }
 
     private ProcessBuilder spawnDownloadProcess(String url, File output) {
-        return new ProcessBuilder("ytdl", "-o", output.getAbsolutePath(), "-s", url).directory(ytdlExec.getParentFile());
+        return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-o", output.getAbsolutePath(), "-s", url);
     }
 
     private ProcessBuilder spawnInfoProcess(String url) {
-        return new ProcessBuilder("ytdl", "-j", "-s", url).directory(ytdlExec.getParentFile());
+        return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-j", "-s", url);
     }
 
     private IPromise<YoutubeSong> resolveVideo(File in, File out, YoutubeInfo info) {
