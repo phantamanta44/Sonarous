@@ -2,6 +2,7 @@ package io.github.phantamanta44.sonarous.player.song;
 
 import com.github.fge.lambdas.Throwing;
 import io.github.phantamanta44.nomreflect.Reflect;
+import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 
 import java.util.List;
@@ -29,8 +30,10 @@ public class SongResolver {
     
     public IPromise<? extends ISong> resolve(String url) {
         Optional<ISongProvider> provider = providers.stream().filter(p -> p.canResolve(url)).findAny();
-        if (provider.isPresent())
+        if (provider.isPresent()) {
+            BotMain.log().info("RSO: {} / {}", provider.get().getName(), url);
             return provider.get().resolve(url);
+        }
         throw new UnsupportedOperationException();
     }
 

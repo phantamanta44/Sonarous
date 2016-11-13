@@ -2,45 +2,32 @@ package io.github.phantamanta44.sonarous.util;
 
 import com.google.gson.JsonElement;
 import io.github.phantamanta44.sonarous.BotMain;
-import io.github.phantamanta44.sonarous.util.deferred.Deferreds;
+import io.github.phantamanta44.sonarous.util.concurrent.ChildProcess;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
-import net.bramp.ffmpeg.FFmpeg;
-import net.bramp.ffmpeg.FFmpegExecutor;
-import net.bramp.ffmpeg.FFprobe;
-import net.bramp.ffmpeg.builder.FFmpegBuilder;
 
 import java.io.File;
-import java.io.IOException;
 
 public class FFmpegUtils {
 
-    private static FFmpeg ffmpeg;
-    private static FFprobe ffprobe;
-    private static FFmpegExecutor exec;
+    private static File ffmpegExec;
 
-    public static IPromise<Void> extractAudio(File in, File out) {
+    public static IPromise<byte[]> audioFrom(byte[] input) {
         if (!ffmpegExists())
             throw new UnsupportedOperationException();
-        FFmpegBuilder builder = new FFmpegBuilder()
-                .setInput(in.getAbsolutePath())
-                .addOutput(out.getAbsolutePath())
-                .setFormat("mp3")
-                .done();
-         return Deferreds.call(() -> exec.createJob(builder).run()).promise();
+        return ChildProcess.runWithStdin(
+                new ProcessBuilder(ffmpegExec.getAbsolutePath(), "-y", "-v", "-8", "-i", "pipe:0", "-f", "mp3", "-"),
+                input
+        );
     }
 
     public static boolean ffmpegExists() {
-        if (ffmpeg == null || ffprobe == null) {
+        if (ffmpegExec == null) {
             JsonElement ffmpegPath = BotMain.client().getConfigValue("ffmpeg.ffmpegPath");
-            JsonElement ffprobePath = BotMain.client().getConfigValue("ffmpeg.ffprobePath");
-            if (ffmpegPath == null || ffprobePath == null)
+            if (ffmpegPath == null)
                 return false;
-            try {
-                ffmpeg = new FFmpeg(ffmpegPath.getAsString());
-                ffprobe = new FFprobe(ffprobePath.getAsString());
-                exec = new FFmpegExecutor(ffmpeg, ffprobe);
-            } catch (IOException e) {
-                e.printStackTrace();
+            ffmpegExec = new File(ffmpegPath.getAsString());
+            if (!ffmpegExec.exists()) {
+                ffmpegExec = null;
                 return false;
             }
         }

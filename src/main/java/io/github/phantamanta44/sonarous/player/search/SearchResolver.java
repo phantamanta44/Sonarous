@@ -2,6 +2,7 @@ package io.github.phantamanta44.sonarous.player.search;
 
 import com.github.fge.lambdas.Throwing;
 import io.github.phantamanta44.nomreflect.Reflect;
+import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.player.song.SongResolver;
 import io.github.phantamanta44.sonarous.util.Lambdas;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
@@ -31,8 +32,10 @@ public class SearchResolver {
 
     public IPromise<List<? extends ISearchResult>> resolve(String providerId, String query) {
         ISearchProvider provider = providers.get(providerId.toLowerCase());
-        if (provider != null)
+        if (provider != null) {
+            BotMain.log().info("RSE: {} / {}", provider.getIdentifier(), query);
             return provider.search(query);
+        }
         throw new UnsupportedOperationException();
     }
 

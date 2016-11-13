@@ -16,8 +16,8 @@ import sx.blah.discord.api.internal.DiscordUtils;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.regex.Pattern;
 
 public class YoutubeSongProvider implements ISongProvider {
@@ -40,11 +40,9 @@ public class YoutubeSongProvider implements ISongProvider {
     @Override
     public IPromise<? extends ISong> resolve(String url) {
         final String ytUrl = url.replaceAll("youtu\\.be/", "youtube.com/watch?v=");
-        String fName = String.format("%s-%d.temp", ytUrl.replaceAll("\\S", ""), System.currentTimeMillis());
-        File videoFile = new File(fName + ".v"), audioFile = new File(fName + ".a");
-        return ChildProcess.run(spawnInfoProcess(ytUrl))
-                .then(info -> ChildProcess.run(spawnDownloadProcess(ytUrl, videoFile))
-                .then(ignored -> resolveVideo(videoFile, audioFile, new YoutubeInfo(info))));
+        return ChildProcess.runParseStr(spawnInfoProcess(ytUrl))
+                .then(info -> ChildProcess.run(spawnDownloadProcess(ytUrl))
+                .then(videoData -> resolveVideo(videoData, new YoutubeInfo(info))));
     }
 
     @Override
@@ -57,28 +55,23 @@ public class YoutubeSongProvider implements ISongProvider {
         return "YouTube";
     }
 
-    private ProcessBuilder spawnDownloadProcess(String url, File output) {
-        return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-o", output.getAbsolutePath(), "-s", url);
+    private ProcessBuilder spawnDownloadProcess(String url) {
+        return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-f", "worst-video", "-o", "-", "-s", url);
     }
 
     private ProcessBuilder spawnInfoProcess(String url) {
         return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-j", "-s", url);
     }
 
-    private IPromise<YoutubeSong> resolveVideo(File in, File out, YoutubeInfo info) {
-        return FFmpegUtils.extractAudio(in, out)
-                .then(ignored -> Deferreds.call(Throwing.supplier(() -> {
-                        try (FileInputStream rawStream = new FileInputStream(out)) {
-                            AudioInputStream raw = AudioSystem.getAudioInputStream(rawStream);
-                            AudioInputStream converted = DiscordUtils.getPCMStream(raw);
-                            byte[] bytes = IOUtils.toByteArray(converted);
-                            return new YoutubeSong(info, bytes, converted.getFormat().getFrameSize(), this);
-                        }
-                })).promise())
-                .always(ignored -> {
-                    in.delete();
-                    out.delete();
-                });
+    private IPromise<YoutubeSong> resolveVideo(byte[] videoData, YoutubeInfo info) {
+        return FFmpegUtils.audioFrom(videoData).then(bytes -> Deferreds.call(Throwing.supplier(() -> {
+            try (AudioInputStream raw = AudioSystem.getAudioInputStream(new ByteArrayInputStream(bytes))) {
+                try (AudioInputStream converted = DiscordUtils.getPCMStream(raw)) {
+                    byte[] convertedBytes = IOUtils.toByteArray(converted);
+                    return new YoutubeSong(info, convertedBytes, converted.getFormat().getFrameSize(), this);
+                }
+            }
+        })).promise());
     }
 
     private static class YoutubeInfo {

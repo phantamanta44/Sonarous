@@ -41,7 +41,7 @@ public class MusicPlayer {
     }
 
     public synchronized void decrementOperations() {
-        operations--;
+        operations = Math.max(operations - 1, 0);
         if (operations == 0 && notChan != null)
             notChan.setTypingStatus(false);
     }

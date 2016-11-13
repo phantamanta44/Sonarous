@@ -35,7 +35,10 @@ public class AmplificationProcessor implements IAudioProcessor {
 
     @Override
     public byte[] provide() {
-        ByteBuffer buf = ByteBuffer.wrap(source.provide()).order(ByteOrder.BIG_ENDIAN);
+        byte[] data = source.provide();
+        if (data == null || data.length == 0)
+            return new byte[0];
+        ByteBuffer buf = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN);
         for (int i = 0; i < buf.capacity(); i += 2) {
             short sample = buf.getShort(i);
             buf.putShort(i, (short)(sample * amplitude));

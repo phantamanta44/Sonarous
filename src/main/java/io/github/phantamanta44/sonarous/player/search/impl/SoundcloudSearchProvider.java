@@ -1,31 +1,18 @@
 package io.github.phantamanta44.sonarous.player.search.impl;
 
-import com.github.fge.lambdas.Throwing;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.player.search.ISearchProvider;
 import io.github.phantamanta44.sonarous.player.search.ISearchResult;
 import io.github.phantamanta44.sonarous.player.song.ISong;
-import io.github.phantamanta44.sonarous.player.song.ISongProvider;
 import io.github.phantamanta44.sonarous.player.song.SongResolver;
-import io.github.phantamanta44.sonarous.util.SafeJsonWrapper;
-import io.github.phantamanta44.sonarous.util.deferred.Deferreds;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 import io.github.phantamanta44.sonarous.util.io.PromiseIO;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import sx.blah.discord.api.internal.DiscordUtils;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 

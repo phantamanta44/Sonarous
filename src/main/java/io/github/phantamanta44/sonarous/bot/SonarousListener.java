@@ -41,6 +41,22 @@ public class SonarousListener {
             return;
 
         try {
+            if (event.getMessage().getChannel().isPrivate())
+                BotMain.log().info("CDM: {} ({}#{}): {}",
+                        event.getMessage().getAuthor().getID(),
+                        event.getMessage().getAuthor().getName(),
+                        event.getMessage().getAuthor().getDiscriminator(),
+                        event.getMessage().getContent()
+                );
+            else
+                BotMain.log().info("CGD: {}#{} / {} ({}#{}): {}",
+                        event.getMessage().getGuild().getName(),
+                        event.getMessage().getChannel().getName(),
+                        event.getMessage().getAuthor().getID(),
+                        event.getMessage().getAuthor().getName(),
+                        event.getMessage().getAuthor().getDiscriminator(),
+                        event.getMessage().getContent()
+                );
             BotMain.commander().execute(new CmdCtx(event), cmd);
         } catch (PrereqNotMetException e) {
             RBU.reply(event.getMessage(), e.getPrerequisite().getFailMessage());

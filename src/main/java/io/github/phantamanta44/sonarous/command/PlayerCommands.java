@@ -75,6 +75,7 @@ public class PlayerCommands {
             }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve audio: %s", e.getMessage()))
             .always(ignored -> player.decrementOperations());
         } catch (UnsupportedOperationException e) {
+            player.decrementOperations();
             RBU.reply(ctx.getMessage(), "This audio source isn't supported!");
         }
     }
@@ -233,6 +234,7 @@ public class PlayerCommands {
         try {
             player.incrementOperations();
             search.resolve(provider, Arrays.stream(args).skip(1).collect(Collectors.joining(" "))).done(r -> {
+                player.search.clear();
                 player.search.addAll(r);
                 if (r.isEmpty())
                     RBU.reply(ctx.getMessage(), "No results!");
@@ -246,6 +248,7 @@ public class PlayerCommands {
             }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve search results: %s", e.getMessage()))
             .always(ignored -> player.decrementOperations());
         } catch (UnsupportedOperationException e) {
+            player.decrementOperations();
             RBU.reply(ctx.getMessage(), "This search provider isn't supported!");
         }
     }
