@@ -97,6 +97,7 @@ public class MusicPlayer {
     }
 
     public void clearQueue() {
+        playing = null;
         queue.clear();
         skipVotes.clear();
         search.clear();

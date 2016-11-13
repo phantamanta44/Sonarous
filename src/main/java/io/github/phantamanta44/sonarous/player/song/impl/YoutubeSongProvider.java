@@ -39,10 +39,11 @@ public class YoutubeSongProvider implements ISongProvider {
 
     @Override
     public IPromise<? extends ISong> resolve(String url) {
-        String fName = String.format("%s-%d.temp", url.replaceAll("\\S", ""), System.currentTimeMillis());
+        final String ytUrl = url.replaceAll("youtu\\.be/", "youtube.com/watch?v=");
+        String fName = String.format("%s-%d.temp", ytUrl.replaceAll("\\S", ""), System.currentTimeMillis());
         File videoFile = new File(fName + ".v"), audioFile = new File(fName + ".a");
-        return ChildProcess.run(spawnInfoProcess(url))
-                .then(info -> ChildProcess.run(spawnDownloadProcess(url, videoFile))
+        return ChildProcess.run(spawnInfoProcess(ytUrl))
+                .then(info -> ChildProcess.run(spawnDownloadProcess(ytUrl, videoFile))
                 .then(ignored -> resolveVideo(videoFile, audioFile, new YoutubeInfo(info))));
     }
 
