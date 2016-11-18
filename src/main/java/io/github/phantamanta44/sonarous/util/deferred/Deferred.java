@@ -26,7 +26,10 @@ public class Deferred<A> {
     public void reject(Throwable e) {
         this.exception = e;
         state = PromiseState.REJECTED;
-        onReject.accept(e);
+        if (onReject.hasHandler())
+            onReject.accept(e);
+        else
+            e.printStackTrace();
     }
 
     public void notifyProgress() {

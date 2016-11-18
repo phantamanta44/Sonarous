@@ -1,15 +1,18 @@
 package io.github.phantamanta44.sonarous.player;
 
+import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.player.audio.AmplificationProcessor;
 import io.github.phantamanta44.sonarous.player.audio.SonarousAudioProvider;
 import io.github.phantamanta44.sonarous.player.search.ISearchResult;
 import io.github.phantamanta44.sonarous.player.song.ISong;
+import io.github.phantamanta44.sonarous.util.Embed;
 import io.github.phantamanta44.sonarous.util.RBU;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,18 +113,22 @@ public class MusicPlayer {
         return playing;
     }
 
-    public String getPlayingMessage() {
-        StringBuilder msg = new StringBuilder("__**Now Playing: ");
-        if (playing.getAuthor() != null)
-            msg.append(playing.getAuthor()).append(" \u2013 ");
-        msg.append(playing.getName()).append("**__\n");
-        if (playing.getAlbum() != null)
-            msg.append("**From the Album: ").append(playing.getAlbum()).append("**\n");
-        if (playing.getUrl() != null)
-            msg.append("**URL: ").append(playing.getUrl()).append("**\n");
-        if (playing.getArtUrl() != null)
-            msg.append("**Artwork: ").append(playing.getArtUrl()).append("**\n");
-        return msg.append("*(via ").append(playing.getProvider().getName()).append(")*").toString();
+    public Embed getPlayingMessage() {
+        Embed msg = new Embed()
+                .withAuthor("Now Playing", null, BotMain.EMBED_ICON)
+                .withTitle(playing.getName())
+                .withFooter("Via " + playing.getProvider().getName(), playing.getProvider().getIconUrl())
+                .withColour(BotMain.EMBED_COL);
+        if (playing.getAuthor() != null && !playing.getAuthor().isEmpty())
+            msg.withField("Artist", playing.getAuthor());
+        if (playing.getAlbum() != null && !playing.getAlbum().isEmpty())
+            msg.withField("Album", playing.getAlbum());
+        msg.withField("Length", formatDuration(playing.getLength()));
+        if (playing.getUrl() != null && !playing.getUrl().isEmpty())
+            msg.withUrl(playing.getUrl());
+        if (playing.getArtUrl() != null && !playing.getArtUrl().isEmpty())
+            msg.withThumbnail(playing.getArtUrl());
+        return msg;
     }
 
     public Stream<ISong> queue() {
@@ -154,6 +161,19 @@ public class MusicPlayer {
 
     public IVoiceChannel getChannel() {
         return channel;
+    }
+
+    private static String formatDuration(float secondFloat) {
+        int ttlSeconds = (int)Math.ceil(secondFloat);
+        if (ttlSeconds < 60)
+            return String.format("0:%02d", ttlSeconds);
+        int seconds = ttlSeconds % 60;
+        int ttlMinutes = (ttlSeconds - seconds) / 60;
+        if (ttlMinutes < 60)
+            return String.format("%d:%02d", ttlMinutes, seconds);
+        int minutes = ttlMinutes % 60;
+        int ttlHours = (ttlMinutes - minutes) / 60;
+        return String.format("%d:%02d:%02d", ttlHours, minutes, seconds);
     }
 
 }

@@ -11,5 +11,7 @@ public interface ISongProvider {
     boolean canResolve(String url);
 
     String getName();
-    
+
+    String getIconUrl();
+
 }

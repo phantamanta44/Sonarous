@@ -12,7 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.Discord4J;
 
+import java.awt.*;
+
 public class BotMain {
+
+    public static final Color EMBED_COL = new Color(33, 150, 243);
+    public static final String EMBED_ICON = "https://i.imgur.com/RzpB4aj.png";
 
     private static Discord client;
     private static CommandEngine<CmdCtx> commander;
@@ -49,5 +54,5 @@ public class BotMain {
     public static Logger log() {
         return log;
     }
-	
+
 }

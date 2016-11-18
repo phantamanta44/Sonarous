@@ -50,6 +50,11 @@ public class SoundcloudSongProvider implements ISongProvider {
         return "SoundCloud";
     }
 
+    @Override
+    public String getIconUrl() {
+        return "https://i.imgur.com/ksoDyaS.png";
+    }
+
     private IPromise<SoundcloudSong> parseSoundcloud(JsonObject dto) {
         return Deferreds.call(Throwing.supplier(() -> {
             if (!dto.get("kind").getAsString().equalsIgnoreCase("track"))
@@ -74,17 +79,18 @@ public class SoundcloudSongProvider implements ISongProvider {
         private final String name, author, url, artUrl;
         private final byte[] audio;
         private final ISongProvider provider;
-        private final int frameSize;
+        private final int frameSize, channelCount;
 
         public SoundcloudSong(JsonObject dto, byte[] audio, ISongProvider provider, AudioFormat format) {
             SafeJsonWrapper wrapper = new SafeJsonWrapper(dto);
             this.name = wrapper.getString("title");
-            this.author = wrapper.getJsonObject("user").getString("full_name");
+            this.author = wrapper.getJsonObject("user").getString("username");
             this.url = wrapper.getString("permalink_url");
             this.artUrl = wrapper.getString("artwork_url").replaceAll("large.jpg", "t500x500.jpg");
             this.audio = audio;
             this.provider = provider;
             this.frameSize = format.getFrameSize();
+            this.channelCount = format.getChannels();
         }
 
         @Override
@@ -120,6 +126,11 @@ public class SoundcloudSongProvider implements ISongProvider {
         @Override
         public byte[] getAudio() {
             return audio;
+        }
+
+        @Override
+        public int getChannelCount() {
+            return channelCount;
         }
 
         @Override

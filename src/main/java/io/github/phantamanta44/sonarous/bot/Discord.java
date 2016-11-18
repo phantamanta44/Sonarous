@@ -40,7 +40,7 @@ public class Discord {
         try {
             api = new ClientBuilder().withToken(getConfigValue("token").getAsString()).build();
             api.getDispatcher().registerTemporaryListener((ReadyEvent event) -> def.resolve(event));
-            api.login(false);
+            api.login();
         } catch (Throwable e) {
             def.reject(e);
         }

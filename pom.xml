@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4J</artifactId>
-			<version>2.6.1</version>
+			<version>225c4f3861a364b6d029aef1d4ac93ab3e0b8ee2</version>
 		</dependency>
         <dependency>
             <groupId>com.github.phantamanta44</groupId>

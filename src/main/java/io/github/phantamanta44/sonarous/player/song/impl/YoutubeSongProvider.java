@@ -13,7 +13,9 @@ import io.github.phantamanta44.sonarous.util.deferred.Deferreds;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
 import org.apache.commons.io.IOUtils;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.ByteArrayInputStream;
@@ -55,6 +57,11 @@ public class YoutubeSongProvider implements ISongProvider {
         return "YouTube";
     }
 
+    @Override
+    public String getIconUrl() {
+        return "https://i.imgur.com/Cg9xB0R.png";
+    }
+
     private ProcessBuilder spawnDownloadProcess(String url) {
         return new ProcessBuilder(ytdlExec.getAbsolutePath(), "-f", "worst-video", "-o", "-", "-s", url);
     }
@@ -68,7 +75,7 @@ public class YoutubeSongProvider implements ISongProvider {
             try (AudioInputStream raw = AudioSystem.getAudioInputStream(new ByteArrayInputStream(bytes))) {
                 try (AudioInputStream converted = DiscordUtils.getPCMStream(raw)) {
                     byte[] convertedBytes = IOUtils.toByteArray(converted);
-                    return new YoutubeSong(info, convertedBytes, converted.getFormat().getFrameSize(), this);
+                    return new YoutubeSong(info, convertedBytes, converted.getFormat(), this);
                 }
             }
         })).promise());
@@ -76,13 +83,14 @@ public class YoutubeSongProvider implements ISongProvider {
 
     private static class YoutubeInfo {
 
-        public final String videoName, channelName, videoUrl;
+        public final String videoName, thumbUrl, channelName, videoUrl;
 
         public YoutubeInfo(String raw) {
             JsonObject dto = new JsonParser().parse(raw).getAsJsonObject();
             this.videoName = dto.get("title").getAsString();
             this.channelName = dto.get("author").getAsString();
             this.videoUrl = "https://youtu.be/" + dto.get("id").getAsString();
+            this.thumbUrl = "https://img.youtube.com/vi/" + dto.get("id").getAsString() + "/hqdefault.jpg";
         }
 
     }
@@ -91,13 +99,14 @@ public class YoutubeSongProvider implements ISongProvider {
 
         private final YoutubeInfo info;
         private final byte[] data;
-        private final int frameSize;
+        private final int frameSize, channelCount;
         private final ISongProvider provider;
 
-        public <B> YoutubeSong(YoutubeInfo info, byte[] data, int frameSize, ISongProvider provider) {
+        public <B> YoutubeSong(YoutubeInfo info, byte[] data, AudioFormat format, ISongProvider provider) {
             this.info = info;
             this.data = data;
-            this.frameSize = frameSize;
+            this.frameSize = format.getFrameSize();
+            this.channelCount = format.getChannels();
             this.provider = provider;
         }
 
@@ -128,12 +137,17 @@ public class YoutubeSongProvider implements ISongProvider {
 
         @Override
         public String getArtUrl() {
-            return null;
+            return info.thumbUrl;
         }
 
         @Override
         public byte[] getAudio() {
             return data;
+        }
+
+        @Override
+        public int getChannelCount() {
+            return channelCount;
         }
 
         @Override

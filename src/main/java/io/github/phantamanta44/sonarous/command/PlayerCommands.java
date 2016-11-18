@@ -5,10 +5,12 @@ import io.github.phantamanta44.commands4a.annot.Alias;
 import io.github.phantamanta44.commands4a.annot.Command;
 import io.github.phantamanta44.commands4a.annot.Desc;
 import io.github.phantamanta44.commands4a.annot.Prereq;
+import io.github.phantamanta44.sonarous.BotMain;
 import io.github.phantamanta44.sonarous.bot.ServerData;
 import io.github.phantamanta44.sonarous.player.MusicPlayer;
 import io.github.phantamanta44.sonarous.player.search.SearchResolver;
 import io.github.phantamanta44.sonarous.player.song.SongResolver;
+import io.github.phantamanta44.sonarous.util.Embed;
 import io.github.phantamanta44.sonarous.util.Maths;
 import io.github.phantamanta44.sonarous.util.RBU;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -113,6 +115,7 @@ public class PlayerCommands {
 
     @Command(name = "forceskip")
     @Desc("Forcefully skips the current song.")
+    @Alias("fs")
     @Prereq("perm:manage_messages") @Prereq("guild:true")
     public static void forceSkip(CmdCtx ctx) {
         MusicPlayer player = ServerData.forServer(ctx.getGuild().getID()).getPlayer();
@@ -172,7 +175,7 @@ public class PlayerCommands {
 
     @Command(name = "playing")
     @Desc("Gets the currently playing song.")
-    @Alias("nowplaying")
+    @Alias("nowplaying") @Alias("np")
     @Prereq("guild:true")
     public static void playing(CmdCtx ctx) {
         MusicPlayer player = ServerData.forServer(ctx.getGuild().getID()).getPlayer();
@@ -215,7 +218,7 @@ public class PlayerCommands {
         else if (player.isQueueEmpty())
             RBU.reply(ctx.getMessage(), "Nothing queued.");
         else if (!Maths.bounds(index, 1, player.queue().count() + 1))
-            RBU.reply(ctx.getMessage(), "Your selected result number is out of bounds!");
+            RBU.reply(ctx.getMessage(), "Your selected song number is out of bounds!");
         else {
             RBU.reply(ctx.getMessage(), "Removed `%s` from the queue.", player.queue().skip(index).findFirst().get().getName());
             player.drop(index);
@@ -239,11 +242,13 @@ public class PlayerCommands {
                 if (r.isEmpty())
                     RBU.reply(ctx.getMessage(), "No results!");
                 else {
-                    StringBuilder msg = new StringBuilder("__**Search Results**__\n");
+                    Embed msg = new Embed()
+                            .withAuthor("Search Results", null, BotMain.EMBED_ICON)
+                            .withFooter("Use \"result [songNumber]\" to select a song.")
+                            .withColour(BotMain.EMBED_COL);
                     IntStream.range(0, r.size())
-                            .mapToObj(i -> String.format("`%d |` %s\n", i + 1, r.get(i).getName()))
-                            .forEach(msg::append);
-                    RBU.send(ctx.getChannel(), msg.append("**Use `result [song]` to select a song.**").toString());
+                            .forEach(i -> msg.withField("Result " + Integer.toString(i + 1), r.get(i).getName()));
+                    RBU.send(ctx.getChannel(), msg);
                 }
             }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve search results: %s", e.getMessage()))
             .always(ignored -> player.decrementOperations());
@@ -255,6 +260,7 @@ public class PlayerCommands {
 
     @Command(name = "result", usage = "index")
     @Desc("Queues a song from the previous search results.")
+    @Alias("pick")
     @Prereq("guild:true")
     public static void result(CmdCtx ctx, Integer index) {
         MusicPlayer player = ServerData.forServer(ctx.getGuild().getID()).getPlayer();
