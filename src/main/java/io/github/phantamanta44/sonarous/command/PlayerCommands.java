@@ -10,10 +10,13 @@ import io.github.phantamanta44.sonarous.bot.ServerData;
 import io.github.phantamanta44.sonarous.player.MusicPlayer;
 import io.github.phantamanta44.sonarous.player.search.SearchResolver;
 import io.github.phantamanta44.sonarous.player.song.SongResolver;
-import io.github.phantamanta44.sonarous.util.Embed;
+import io.github.phantamanta44.sonarous.util.D4JUtils;
 import io.github.phantamanta44.sonarous.util.Maths;
 import io.github.phantamanta44.sonarous.util.RBU;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -184,7 +187,12 @@ public class PlayerCommands {
         else if (player.getPlaying() == null)
             RBU.reply(ctx.getMessage(), "Nothing is playing.");
         else
-            RBU.send(ctx.getChannel(), player.getPlayingMessage());
+            RBU.send(ctx.getChannel(), player.getPlayingMessage()).fail(e -> {
+                if (e instanceof MissingPermissionsException)
+                    RBU.send(ctx.getChannel(), D4JUtils.stringify(player.getPlayingMessage().build()));
+                else
+                    BotMain.log().error("Failed to send embed!", e);
+            });
     }
 
     @Command(name = "lsqueue")
@@ -242,13 +250,19 @@ public class PlayerCommands {
                 if (r.isEmpty())
                     RBU.reply(ctx.getMessage(), "No results!");
                 else {
-                    Embed msg = new Embed()
-                            .withAuthor("Search Results", null, BotMain.EMBED_ICON)
-                            .withFooter("Use \"result [songNumber]\" to select a song.")
-                            .withColour(BotMain.EMBED_COL);
+                    EmbedBuilder msg = new EmbedBuilder()
+                            .withAuthorName("Search Results")
+                            .withAuthorIcon(BotMain.EMBED_ICON)
+                            .withFooterText("Use \"result [songNumber]\" to select a song.")
+                            .withColor(BotMain.EMBED_COL);
                     IntStream.range(0, r.size())
-                            .forEach(i -> msg.withField("Result " + Integer.toString(i + 1), r.get(i).getName()));
-                    RBU.send(ctx.getChannel(), msg);
+                            .forEach(i -> msg.appendField("Result " + Integer.toString(i + 1), r.get(i).getName(), false));
+                    RBU.send(ctx.getChannel(), msg).fail(e -> {
+                        if (e instanceof MissingPermissionsException)
+                            RBU.send(ctx.getChannel(), D4JUtils.stringify(msg.build()));
+                        else
+                            BotMain.log().error("Failed to send embed!", e);
+                    });
                 }
             }).fail(e -> RBU.reply(ctx.getMessage(), "Failed to resolve search results: %s", e.getMessage()))
             .always(ignored -> player.decrementOperations());

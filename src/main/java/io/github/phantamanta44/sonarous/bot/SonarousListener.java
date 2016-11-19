@@ -40,7 +40,21 @@ public class SonarousListener {
         else
             return;
 
+        boolean cmdExists = true;
         try {
+            BotMain.commander().execute(new CmdCtx(event), cmd);
+        } catch (PrereqNotMetException e) {
+            RBU.reply(event.getMessage(), e.getPrerequisite().getFailMessage());
+        } catch (NoSuchCommandException e) {
+            JsonElement mcmCfg = BotMain.client().getConfigValue("missingCommandMessage");
+            if (mcmCfg != null && mcmCfg.getAsBoolean())
+                RBU.reply(event.getMessage(), "No such command `" + e.getCommand() + "`!");
+            cmdExists = false;
+        } catch (InvalidSyntaxException e) {
+            RBU.reply(event.getMessage(), e.getReason());
+        }
+
+        if (cmdExists) {
             if (event.getMessage().getChannel().isPrivate())
                 BotMain.log().info("CDM: {} ({}#{}): {}",
                         event.getMessage().getAuthor().getID(),
@@ -57,15 +71,6 @@ public class SonarousListener {
                         event.getMessage().getAuthor().getDiscriminator(),
                         event.getMessage().getContent()
                 );
-            BotMain.commander().execute(new CmdCtx(event), cmd);
-        } catch (PrereqNotMetException e) {
-            RBU.reply(event.getMessage(), e.getPrerequisite().getFailMessage());
-        } catch (NoSuchCommandException e) {
-            JsonElement mcmCfg = BotMain.client().getConfigValue("missingCommandMessage");
-            if (mcmCfg != null && mcmCfg.getAsBoolean())
-                RBU.reply(event.getMessage(), "No such command `" + e.getCommand() + "`!");
-        } catch (InvalidSyntaxException e) {
-            RBU.reply(event.getMessage(), e.getReason());
         }
     }
 

@@ -5,14 +5,16 @@ import io.github.phantamanta44.sonarous.player.audio.AmplificationProcessor;
 import io.github.phantamanta44.sonarous.player.audio.SonarousAudioProvider;
 import io.github.phantamanta44.sonarous.player.search.ISearchResult;
 import io.github.phantamanta44.sonarous.player.song.ISong;
-import io.github.phantamanta44.sonarous.util.Embed;
+import io.github.phantamanta44.sonarous.util.D4JUtils;
 import io.github.phantamanta44.sonarous.util.RBU;
 import io.github.phantamanta44.sonarous.util.deferred.IPromise;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +78,12 @@ public class MusicPlayer {
             skipVotes.clear();
             playing = queue.remove(0);
             provider.put(playing.getAudio(), playing.getFrameSize());
-            RBU.send(notChan, getPlayingMessage());
+            RBU.send(notChan, getPlayingMessage()).fail(e -> {
+                if (e instanceof MissingPermissionsException)
+                    RBU.send(notChan, D4JUtils.stringify(getPlayingMessage().build()));
+                else
+                    BotMain.log().error("Failed to send embed!", e);
+            });
         } else {
             RBU.send(notChan, "__**The queue is empty! Stopping player...**__");
             clearQueue();
@@ -113,19 +120,21 @@ public class MusicPlayer {
         return playing;
     }
 
-    public Embed getPlayingMessage() {
-        Embed msg = new Embed()
-                .withAuthor("Now Playing", null, BotMain.EMBED_ICON)
+    public EmbedBuilder getPlayingMessage() {
+        EmbedBuilder msg = new EmbedBuilder()
+                .withAuthorName("Now Playing")
+                .withAuthorIcon(BotMain.EMBED_ICON)
                 .withTitle(playing.getName())
-                .withFooter("Via " + playing.getProvider().getName(), playing.getProvider().getIconUrl())
-                .withColour(BotMain.EMBED_COL);
+                .withFooterText("Via " + playing.getProvider().getName())
+                .withFooterIcon(playing.getProvider().getIconUrl())
+                .withColor(BotMain.EMBED_COL);
         if (playing.getAuthor() != null && !playing.getAuthor().isEmpty())
-            msg.withField("Artist", playing.getAuthor());
+            msg.appendField("Artist", playing.getAuthor(), false);
         if (playing.getAlbum() != null && !playing.getAlbum().isEmpty())
-            msg.withField("Album", playing.getAlbum());
-        msg.withField("Length", formatDuration(playing.getLength()));
+            msg.appendField("Album", playing.getAlbum(), false);
+        msg.appendField("Length", formatDuration(playing.getLength()), false);
         if (playing.getUrl() != null && !playing.getUrl().isEmpty())
-            msg.withUrl(playing.getUrl());
+            msg.withAuthorUrl(playing.getUrl());
         if (playing.getArtUrl() != null && !playing.getArtUrl().isEmpty())
             msg.withThumbnail(playing.getArtUrl());
         return msg;
